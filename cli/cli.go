@@ -84,7 +84,8 @@ func init() {
 
 // ghome 返回g根目录
 func ghome() (dir string) {
-	homeDir, _ := os.UserHomeDir()
+	//homeDir, _ := os.UserHomeDir()
+	homeDir := filepath.Clean("D:\\")
 	return filepath.Join(homeDir, ".g")
 }
 
