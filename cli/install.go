@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"runtime"
 
+	ct "github.com/daviddengcn/go-colortext"
+	"github.com/dixonwille/wlog/v3"
+	"github.com/dixonwille/wmenu/v5"
 	"github.com/mholt/archiver"
 	"github.com/urfave/cli"
 	"github.com/voidint/g/version"
@@ -42,10 +45,37 @@ func install(ctx *cli.Context) (err error) {
 		return cli.NewExitError(errstring(err), 1)
 	}
 	// 查找版本下当前平台的安装包
-	pkg, err := v.FindPackage(version.ArchiveKind, runtime.GOOS, runtime.GOARCH)
+	pkgs, err := v.FindPackages(version.ArchiveKind, runtime.GOOS, runtime.GOARCH)
 	if err != nil {
 		return cli.NewExitError(errstring(err), 1)
 	}
+	var pkg *version.Package
+	if len(pkgs) > 1 {
+		menu := wmenu.NewMenu("Please select the package you want to install.")
+		menu.AddColor(
+			wlog.Color{Code: ct.Green},
+			wlog.Color{Code: ct.Yellow},
+			wlog.Color{Code: ct.Magenta},
+			wlog.Color{Code: ct.Yellow},
+		)
+		menu.Action(func(opts []wmenu.Opt) error {
+			pkg = opts[0].Value.(*version.Package)
+			return nil
+		})
+		for i := range pkgs {
+			if i == 0 {
+				menu.Option(pkgs[i].FileName, pkgs[i], true, nil)
+			} else {
+				menu.Option(" "+pkgs[i].FileName, pkgs[i], false, nil)
+			}
+		}
+		if err := menu.Run(); err != nil {
+			return cli.NewExitError(errstring(err), 1)
+		}
+	} else {
+		pkg = pkgs[0]
+	}
+
 	var ext string
 	if runtime.GOOS == "windows" {
 		ext = "zip"
