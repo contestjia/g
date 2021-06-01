@@ -27,7 +27,7 @@ func Run() {
 	app.Name = "g"
 	app.Usage = "Golang Version Manager"
 	app.Version = build.Version()
-	app.Copyright = "Copyright (c) 2019-2020, voidint. All rights reserved."
+	app.Copyright = "Copyright (c) 2019-2021, voidint. All rights reserved."
 	app.Authors = []cli.Author{{Name: "voidint", Email: "voidint@126.com"}}
 
 	app.Before = func(ctx *cli.Context) (err error) {
@@ -50,38 +50,49 @@ func Run() {
 func init() {
 	cli.AppHelpTemplate = fmt.Sprintf(`NAME:
 	{{.Name}}{{if .Usage}} - {{.Usage}}{{end}}
- 
+
  USAGE:
 	{{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .Commands}} command{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
- 
+
  VERSION:
 	%s{{end}}{{end}}{{if .Description}}
- 
+
  DESCRIPTION:
 	{{.Description}}{{end}}{{if len .Authors}}
- 
+
  AUTHOR{{with $length := len .Authors}}{{if ne 1 $length}}S{{end}}{{end}}:
 	{{range $index, $author := .Authors}}{{if $index}}
 	{{end}}{{$author}}{{end}}{{end}}{{if .VisibleCommands}}
- 
+
  COMMANDS:{{range .VisibleCategories}}{{if .Name}}
- 
+
 	{{.Name}}:{{end}}{{range .VisibleCommands}}
 	  {{join .Names ", "}}{{"\t"}}{{.Usage}}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
- 
+
  GLOBAL OPTIONS:
 	{{range $index, $option := .VisibleFlags}}{{if $index}}
 	{{end}}{{$option}}{{end}}{{end}}{{if .Copyright}}
- 
+
  COPYRIGHT:
 	{{.Copyright}}{{end}}
 `, build.ShortVersion)
 }
 
+const (
+	experimentalEnv = "G_EXPERIMENTAL"
+	homeEnv         = "G_HOME"
+	mirrorEnv       = "G_MIRROR"
+)
+
 // ghome 返回g根目录
 func ghome() (dir string) {
 	//homeDir, _ := os.UserHomeDir()
 	homeDir := filepath.Clean("D:\\")
+	if experimental := os.Getenv(experimentalEnv); experimental == "true" {
+		if dir = os.Getenv(homeEnv); dir != "" {
+			return dir
+		}
+	}
 	return filepath.Join(homeDir, ".g")
 }
 

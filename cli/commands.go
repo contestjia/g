@@ -13,7 +13,7 @@ var (
 		{
 			Name:      "ls-remote",
 			Usage:     "List remote versions available for install",
-			UsageText: "g ls-remote [stable|archived]",
+			UsageText: "g ls-remote [stable|archived|unstable]",
 			Action:    listRemote,
 		},
 		{
@@ -33,6 +33,12 @@ var (
 			Usage:     "Uninstall a version",
 			UsageText: "g uninstall <version>",
 			Action:    uninstall,
+		},
+		{
+			Name:      "clean",
+			Usage:     "Remove files from the package download directory",
+			UsageText: "g clean",
+			Action:    clean,
 		},
 	}
 )

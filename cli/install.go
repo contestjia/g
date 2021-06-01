@@ -9,7 +9,7 @@ import (
 	ct "github.com/daviddengcn/go-colortext"
 	"github.com/dixonwille/wlog/v3"
 	"github.com/dixonwille/wmenu/v5"
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	"github.com/urfave/cli"
 	"github.com/voidint/g/version"
 )
@@ -27,7 +27,7 @@ func install(ctx *cli.Context) (err error) {
 	}
 
 	var url string
-	if url = os.Getenv("G_MIRROR"); url == "" {
+	if url = os.Getenv(mirrorEnv); url == "" {
 		url = version.DefaultURL
 	}
 
@@ -86,19 +86,24 @@ func install(ctx *cli.Context) (err error) {
 
 	if _, err = os.Stat(filename); os.IsNotExist(err) {
 		// 本地不存在安装包，从远程下载并检查校验和。
-		if _, err = pkg.Download(filename); err != nil {
+		if _, err = pkg.DownloadWithProgress(filename); err != nil {
 			return cli.NewExitError(errstring(err), 1)
 		}
+
+		fmt.Println("Computing checksum with", pkg.Algorithm)
 		if err = pkg.VerifyChecksum(filename); err != nil {
 			return cli.NewExitError(errstring(err), 1)
 		}
 	} else {
 		// 本地存在安装包，检查校验和。
+		fmt.Println("Computing checksum with", pkg.Algorithm)
 		if err = pkg.VerifyChecksum(filename); err != nil {
 			_ = os.Remove(filename)
 			return cli.NewExitError(errstring(err), 1)
 		}
 	}
+	fmt.Println("Checksums matched")
+
 	// 删除可能存在的历史垃圾文件
 	_ = os.RemoveAll(filepath.Join(versionsDir, "go"))
 
@@ -116,6 +121,6 @@ func install(ctx *cli.Context) (err error) {
 	if err := os.Symlink(targetV, goroot); err != nil {
 		return cli.NewExitError(errstring(err), 1)
 	}
-	fmt.Println("Installed successfully")
+	fmt.Printf("Now using go%s\n", v.Name)
 	return nil
 }

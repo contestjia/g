@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
+	"github.com/k0kubun/go-ansi"
 	"github.com/urfave/cli"
 	"github.com/voidint/g/version"
 )
@@ -22,7 +23,7 @@ func listRemote(ctx *cli.Context) (err error) {
 	}
 
 	var url string
-	if url = os.Getenv("G_MIRROR"); url == "" {
+	if url = os.Getenv(mirrorEnv); url == "" {
 		url = version.DefaultURL
 	}
 
@@ -69,6 +70,6 @@ func listRemote(ctx *cli.Context) (err error) {
 		items = append(items, v)
 	}
 
-	render(inuse(goroot), items, os.Stdout)
+	render(inuse(goroot), items, ansi.NewAnsiStdout())
 	return nil
 }
